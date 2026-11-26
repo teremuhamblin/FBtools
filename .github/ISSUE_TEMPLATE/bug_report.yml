@@ -1,0 +1,65 @@
+name: Signaler un bug
+description: Un comportement incorrect de FBtools
+title: "[Bug] "
+labels: [bug, à-trier]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler ce problème.
+        **Ne collez jamais votre jeton d'accès ni votre secret d'app.**
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Que s'est-il passé ? Qu'attendiez-vous ?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. fbtools config set-page ...
+        2. fbtools posts publish -m "..."
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sortie / message d'erreur
+      description: Incluez le `fbtrace_id` s'il est affiché (il n'est pas secret).
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Version de FBtools
+      placeholder: "fbtools --version"
+    validations:
+      required: true
+  - type: input
+    id: api
+    attributes:
+      label: Version de l'API Graph
+      placeholder: v27.0
+  - type: dropdown
+    id: os
+    attributes:
+      label: Système
+      options: [Linux, macOS, Windows, Docker, Autre]
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Version de Python
+      placeholder: "python --version"
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Vérifications
+      options:
+        - label: J'ai vérifié qu'aucune issue similaire n'existe.
+          required: true
+        - label: J'ai retiré toute donnée sensible (jetons, secrets).
+          required: true

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vulnérabilité de sécurité
+    url: https://github.com/teremuhamblin/FBtools/security/advisories/new
+    about: Signalez les failles en privé, jamais dans une issue publique.
+  - name: Questions et discussions
+    url: https://github.com/teremuhamblin/FBtools/discussions
+    about: Pour l'aide à l'utilisation et les idées ouvertes.
+  - name: Documentation de l'API Graph
+    url: https://developers.facebook.com/docs/graph-api/
+    about: Référence officielle de Meta.
