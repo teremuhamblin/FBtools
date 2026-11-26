@@ -1,0 +1,17 @@
+# Catégories des notes de version générées automatiquement
+changelog:
+  exclude:
+    labels: [ignorer-changelog]
+  categories:
+    - title: Nouveautés
+      labels: [fonctionnalité, enhancement]
+    - title: Corrections
+      labels: [bug]
+    - title: Sécurité
+      labels: [sécurité]
+    - title: Documentation
+      labels: [documentation]
+    - title: Dépendances et CI
+      labels: [dépendances, ci]
+    - title: Autres changements
+      labels: ["*"]

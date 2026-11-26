@@ -1,0 +1,29 @@
+name: Proposer une fonctionnalité
+description: Une idée d'amélioration pour FBtools
+title: "[Idée] "
+labels: [fonctionnalité, à-trier]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème à résoudre
+      description: Quel besoin cette fonctionnalité couvre-t-elle ?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      description: Exemple de commande souhaitée, options, sortie attendue.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: Points d'API Graph concernés
+      description: Endpoints, permissions nécessaires, liens vers la documentation Meta.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées

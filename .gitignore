@@ -1,6 +1,35 @@
+# Environnements
 .venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Python
 __pycache__/
+*.py[cod]
 *.egg-info/
+build/
 dist/
+
+# Outils
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Documentation
+site/
+
+# Éditeurs / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Exports FBtools
+*.csv
+!examples/*.csv
