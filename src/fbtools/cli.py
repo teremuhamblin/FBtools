@@ -1,4 +1,5 @@
 """Point d'entrée de la CLI `fbtools`."""
+
 from __future__ import annotations
 
 import sys
@@ -12,8 +13,15 @@ from .client import GraphAPIError, GraphClient
 from .config import Config
 from .output import render, to_csv, to_json
 
-FORMAT = click.option("-f", "--format", "fmt", type=click.Choice(["table", "json", "csv"]),
-                      default="table", show_default=True, help="Format de sortie.")
+FORMAT = click.option(
+    "-f",
+    "--format",
+    "fmt",
+    type=click.Choice(["table", "json", "csv"]),
+    default="table",
+    show_default=True,
+    help="Format de sortie.",
+)
 
 
 def get_client(ctx: click.Context) -> GraphClient:
@@ -26,8 +34,9 @@ def get_client(ctx: click.Context) -> GraphClient:
 def resolve_page(ctx: click.Context, page_id: str | None) -> str:
     page_id = page_id or ctx.obj["config"].default_page_id
     if not page_id:
-        raise click.UsageError("Indiquez --page ou définissez une Page par défaut "
-                               "(`fbtools config set-page <ID>`).")
+        raise click.UsageError(
+            "Indiquez --page ou définissez une Page par défaut (`fbtools config set-page <ID>`)."
+        )
     return page_id
 
 
@@ -41,7 +50,9 @@ def parse_when(value: str) -> int:
         dt = dt.astimezone()  # fuseau local
     ts = int(dt.timestamp())
     if ts < int(datetime.now(timezone.utc).timestamp()) + 600:
-        raise click.BadParameter("La publication programmée doit être au moins 10 min dans le futur.")
+        raise click.BadParameter(
+            "La publication programmée doit être au moins 10 min dans le futur."
+        )
     return ts
 
 
@@ -144,8 +155,11 @@ def posts_list(ctx, page_id, limit: int, fmt: str) -> None:
 @posts.command("publish")
 @click.option("--page", "page_id", help="ID de la Page.")
 @click.option("-m", "--message", help="Texte de la publication.")
-@click.option("--message-file", type=click.Path(exists=True, dir_okay=False, path_type=Path),
-              help="Lire le texte depuis un fichier.")
+@click.option(
+    "--message-file",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="Lire le texte depuis un fichier.",
+)
 @click.option("--link", help="Lien à partager.")
 @click.option("--at", "when", help="Programmer (ISO 8601, ex. 2026-12-01T09:00+01:00).")
 @click.option("--dry-run", is_flag=True, help="Afficher la requête sans publier.")
@@ -158,8 +172,7 @@ def posts_publish(ctx, page_id, message, message_file, link, when, dry_run, yes)
     if not message and not link:
         raise click.UsageError("Indiquez --message, --message-file ou --link.")
     ts = parse_when(when) if when else None
-    summary = {"page": page_id, "message": message, "link": link,
-               "scheduled_publish_time": ts}
+    summary = {"page": page_id, "message": message, "link": link, "scheduled_publish_time": ts}
     if dry_run:
         click.echo(to_json({"dry_run": True, **summary}))
         return
@@ -190,8 +203,12 @@ def comments() -> None:
 @comments.command("export")
 @click.argument("post_id")
 @click.option("-n", "--limit", type=int, default=None, help="Nombre max (défaut : tous).")
-@click.option("-o", "--output", type=click.Path(dir_okay=False, path_type=Path),
-              help="Fichier de sortie (.csv ou .json). Défaut : stdout en CSV.")
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(dir_okay=False, path_type=Path),
+    help="Fichier de sortie (.csv ou .json). Défaut : stdout en CSV.",
+)
 @click.pass_context
 def comments_export(ctx, post_id: str, limit, output: Path | None) -> None:
     rows = get_client(ctx).comments(post_id, limit=limit)
@@ -210,25 +227,45 @@ DEFAULT_METRICS = "page_post_engagements,page_total_media_view_unique,page_follo
 
 @cli.command()
 @click.option("--page", "page_id", help="ID de la Page.")
-@click.option("--metric", "metrics", default=DEFAULT_METRICS, show_default=True,
-              help="Métriques séparées par des virgules.")
-@click.option("--period", type=click.Choice(["day", "week", "days_28", "month", "lifetime"]),
-              default="day", show_default=True)
+@click.option(
+    "--metric",
+    "metrics",
+    default=DEFAULT_METRICS,
+    show_default=True,
+    help="Métriques séparées par des virgules.",
+)
+@click.option(
+    "--period",
+    type=click.Choice(["day", "week", "days_28", "month", "lifetime"]),
+    default="day",
+    show_default=True,
+)
 @click.option("--since", help="Date de début (AAAA-MM-JJ).")
 @click.option("--until", help="Date de fin (AAAA-MM-JJ).")
 @FORMAT
 @click.pass_context
 def insights(ctx, page_id, metrics, period, since, until, fmt) -> None:
     """Afficher les statistiques d'une Page."""
-    data = get_client(ctx).insights(resolve_page(ctx, page_id),
-                                    [m.strip() for m in metrics.split(",") if m.strip()],
-                                    period, since, until)
+    data = get_client(ctx).insights(
+        resolve_page(ctx, page_id),
+        [m.strip() for m in metrics.split(",") if m.strip()],
+        period,
+        since,
+        until,
+    )
     if fmt == "json":
         click.echo(to_json(data))
         return
-    rows = [{"metric": m.get("name"), "period": m.get("period"),
-             "end_time": v.get("end_time"), "value": v.get("value")}
-            for m in data for v in m.get("values", [])]
+    rows = [
+        {
+            "metric": m.get("name"),
+            "period": m.get("period"),
+            "end_time": v.get("end_time"),
+            "value": v.get("value"),
+        }
+        for m in data
+        for v in m.get("values", [])
+    ]
     click.echo(render(rows, fmt, ["metric", "period", "end_time", "value"]))
 
 

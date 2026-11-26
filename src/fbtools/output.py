@@ -1,4 +1,5 @@
 """Rendu des résultats : tableau, JSON ou CSV."""
+
 from __future__ import annotations
 
 import csv
@@ -8,7 +9,7 @@ from collections.abc import Iterable
 from typing import Any
 
 
-def flatten(row: dict, prefix: str = "") -> dict:
+def flatten(row: dict[str, Any], prefix: str = "") -> dict[str, Any]:
     out: dict[str, Any] = {}
     for k, v in row.items():
         key = f"{prefix}{k}"
@@ -25,7 +26,7 @@ def to_json(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2)
 
 
-def to_csv(rows: Iterable[dict], columns: list[str] | None = None) -> str:
+def to_csv(rows: Iterable[dict[str, Any]], columns: list[str] | None = None) -> str:
     flat = [flatten(r) for r in rows]
     cols = columns or sorted({k for r in flat for k in r})
     buf = io.StringIO()
@@ -35,7 +36,7 @@ def to_csv(rows: Iterable[dict], columns: list[str] | None = None) -> str:
     return buf.getvalue()
 
 
-def to_table(rows: list[dict], columns: list[str], max_width: int = 60) -> str:
+def to_table(rows: list[dict[str, Any]], columns: list[str], max_width: int = 60) -> str:
     flat = [flatten(r) for r in rows]
     if not flat:
         return "(aucun résultat)"
@@ -51,7 +52,7 @@ def to_table(rows: list[dict], columns: list[str], max_width: int = 60) -> str:
     return "\n".join([line, sep, *body])
 
 
-def render(rows: list[dict], fmt: str, columns: list[str]) -> str:
+def render(rows: list[dict[str, Any]], fmt: str, columns: list[str]) -> str:
     if fmt == "json":
         return to_json(rows)
     if fmt == "csv":

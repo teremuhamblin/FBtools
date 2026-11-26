@@ -3,12 +3,15 @@
 Les variables d'environnement ont priorité sur le fichier :
   FBTOOLS_ACCESS_TOKEN, FBTOOLS_APP_SECRET, FBTOOLS_API_VERSION, FBTOOLS_CONFIG_DIR
 """
+
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 from . import DEFAULT_API_VERSION
 
@@ -34,10 +37,18 @@ class Config:
 
     @classmethod
     def load(cls) -> Config:
-        data: dict = {}
+        data: dict[str, Any] = {}
         path = config_path()
         if path.exists():
-            data = json.loads(path.read_text(encoding="utf-8"))
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"Fichier de configuration illisible ({path}) : {exc.msg}. "
+                    "Corrigez-le ou supprimez-le puis relancez `fbtools config set-token`."
+                ) from exc
+            if not isinstance(data, dict):
+                raise ValueError(f"Fichier de configuration invalide : {path}")
         cfg = cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
         cfg.access_token = os.environ.get("FBTOOLS_ACCESS_TOKEN", cfg.access_token)
         cfg.app_secret = os.environ.get("FBTOOLS_APP_SECRET", cfg.app_secret)
@@ -48,13 +59,11 @@ class Config:
         path = config_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(asdict(self), indent=2), encoding="utf-8")
-        try:
-            os.chmod(path, 0o600)  # le jeton est un secret
-        except OSError:
-            pass
+        with contextlib.suppress(OSError):  # le jeton est un secret
+            os.chmod(path, 0o600)
         return path
 
-    def masked(self) -> dict:
+    def masked(self) -> dict[str, Any]:
         def mask(v: str | None) -> str | None:
             if not v:
                 return v
