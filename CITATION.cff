@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "Si vous utilisez FBtools, merci de le citer ainsi."
+title: "FBtools"
+abstract: "CLI Python pour gérer des Pages Facebook via l'API Graph de Meta."
+type: software
+authors:
+  - alias: teremuhamblin
+version: 1.0.0
+date-released: 2026-11-26
+license: MIT
+repository-code: "https://github.com/teremuhamblin/FBtools"
+url: "https://teremuhamblin.github.io/FBtools/"
+keywords: [facebook, meta, graph-api, cli, python]
