@@ -13,11 +13,18 @@
 ---
 
 ![Version](https://img.shields.io/badge/version-1.0-1877F2?style=for-the-badge&logo=semver&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=FFD43B)
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=FFD43B)
 ![Graph API](https://img.shields.io/badge/Graph%20API-v27.0-0866FF?style=for-the-badge&logo=meta&logoColor=white)
 ![Licence](https://img.shields.io/badge/licence-MIT-42B72A?style=for-the-badge)
 
 ---
+
+[![CI](https://github.com/teremuhamblin/FBtools/actions/workflows/ci.yml/badge.svg)](https://github.com/teremuhamblin/FBtools/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/teremuhamblin/FBtools/actions/workflows/codeql.yml/badge.svg)](https://github.com/teremuhamblin/FBtools/actions/workflows/codeql.yml)
+[![Docs](https://github.com/teremuhamblin/FBtools/actions/workflows/docs.yml/badge.svg)](https://teremuhamblin.github.io/FBtools/)
+![Couverture](https://img.shields.io/badge/couverture-97%25-42B72A?style=flat-square)
+![Typage](https://img.shields.io/badge/mypy-strict-2A6DB2?style=flat-square)
+![Docker](https://img.shields.io/badge/docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white)
 
 ![CLI](https://img.shields.io/badge/CLI-Click-4B4B4B?style=flat-square&logo=gnubash&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white)
@@ -31,7 +38,7 @@
 
 <sub><samp>publier · programmer · supprimer · exporter · mesurer — sans quitter le terminal</samp></sub>
 
-[**Installation**](#installation) &nbsp;•&nbsp; [**Démarrage rapide**](#démarrage-rapide) &nbsp;•&nbsp; [**Commandes**](#référence-des-commandes) &nbsp;•&nbsp; [**Architecture**](#architecture) &nbsp;•&nbsp; [**Développement**](#développement)
+[**Installation**](#installation) &nbsp;•&nbsp; [**Démarrage rapide**](#démarrage-rapide) &nbsp;•&nbsp; [**Commandes**](#référence-des-commandes) &nbsp;•&nbsp; [**Architecture**](#architecture) &nbsp;•&nbsp; [**Développement**](#développement) &nbsp;•&nbsp; [**Documentation**](https://teremuhamblin.github.io/FBtools/)
 
 </div>
 
@@ -62,8 +69,11 @@
    - [Limites de débit et backoff](#limites-de-débit-et-backoff)
 10. [Structure du projet](#structure-du-projet)
 11. [Développement](#développement)
-12. [Notes et bonnes pratiques](#notes-et-bonnes-pratiques)
-13. [Licence](#licence)
+12. [Qualité et intégration continue](#qualité-et-intégration-continue)
+13. [Utilisation comme bibliothèque](#utilisation-comme-bibliothèque)
+14. [Notes et bonnes pratiques](#notes-et-bonnes-pratiques)
+15. [Contribuer, sécurité et support](#contribuer-sécurité-et-support)
+16. [Licence](#licence)
 
 </details>
 
@@ -152,18 +162,27 @@ mindmap
 
 ## Installation
 
+> Prérequis : **Python 3.10 ou plus**.
+
+| Méthode | Commande |
+| :--- | :--- |
+| **pipx** (recommandé) | `pipx install git+https://github.com/teremuhamblin/FBtools.git` |
+| **pip** | `pip install git+https://github.com/teremuhamblin/FBtools.git` |
+| **Docker** | `docker run --rm -e FBTOOLS_ACCESS_TOKEN ghcr.io/teremuhamblin/fbtools pages list` |
+| **Sources** (développement) | voir ci-dessous |
+
 ```bash
-cd fbtools
+git clone https://github.com/teremuhamblin/FBtools.git && cd FBtools
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-fbtools --help
+fbtools --help          # ou : python -m fbtools --help
 ```
 
 <details>
 <summary><b>Windows (PowerShell)</b></summary>
 
 ```powershell
-cd fbtools
+git clone https://github.com/teremuhamblin/FBtools.git; cd FBtools
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
@@ -387,7 +406,7 @@ flowchart LR
 
 ### Limites de débit et backoff
 
-Lorsque l'API renvoie un code de limitation (**4, 17, 32, 613…**), FBtools réessaie automatiquement avec un délai croissant.
+Lorsque l'API renvoie un code temporaire ou de limitation (**1, 2, 4, 17, 32, 341, 613**), une erreur HTTP 5xx ou une coupure réseau, FBtools réessaie automatiquement avec un délai croissant (3 nouvelles tentatives par défaut).
 
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, Helvetica, Arial, sans-serif'}}}%%
@@ -395,7 +414,7 @@ stateDiagram-v2
     direction LR
     [*] --> Requete
     Requete --> Succes: 2xx
-    Requete --> Attente: code 4 / 17 / 32 / 613
+    Requete --> Attente: code temporaire / 5xx / réseau
     Attente --> Requete: backoff puis nouvel essai
     Attente --> Erreur: tentatives épuisées
     Requete --> Erreur: autre erreur
@@ -412,14 +431,14 @@ stateDiagram-v2
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': {'xyChart': {'plotColorPalette':'#1877F2, #42B72A'}}}}%%
 xychart-beta
-    title "Backoff exponentiel — profil illustratif"
-    x-axis "Tentative" [1, 2, 3, 4, 5]
-    y-axis "Délai avant nouvel essai (s)" 0 --> 18
-    bar [1, 2, 4, 8, 16]
-    line [1, 2, 4, 8, 16]
+    title "Backoff exponentiel (plafond 30 s)"
+    x-axis "Nouvelle tentative" [1, 2, 3, 4, 5, 6]
+    y-axis "Délai d'attente (s)" 0 --> 35
+    bar [1, 2, 4, 8, 16, 30]
+    line [1, 2, 4, 8, 16, 30]
 ```
 
-<sub>Graphique illustratif du principe ; les délais et le nombre de tentatives réels sont définis dans <code>client.py</code>.</sub>
+<sub>Délai = 2<sup>n</sup> secondes, plafonné à 30 s (<code>backoff_delay</code> dans <code>client.py</code>). Avec <code>max_retries=3</code> par défaut, seules les 3 premières barres sont utilisées.</sub>
 
 <p align="right"><a href="#top">↑ Retour en haut</a></p>
 
@@ -428,15 +447,28 @@ xychart-beta
 ## Structure du projet
 
 ```text
-fbtools/
-├── pyproject.toml
+FBtools/
+├── .github/
+│   ├── ISSUE_TEMPLATE/        # modèles bug / fonctionnalité
+│   ├── workflows/             # ci, codeql, docs, release, dependency-review
+│   ├── CODEOWNERS · dependabot.yml · release.yml
+│   └── PULL_REQUEST_TEMPLATE.md
+├── assets/                    # bannières clair / sombre
+├── docs/                      # documentation MkDocs Material
+├── examples/                  # cron, GitHub Actions, programmation depuis CSV
 ├── src/fbtools/
-│   ├── __init__.py   # version, version d'API par défaut
-│   ├── cli.py        # commandes Click
-│   ├── client.py     # client API Graph (pagination, retries, jetons de Page)
-│   ├── config.py     # configuration locale + variables d'environnement
-│   └── output.py     # rendu table / JSON / CSV
-└── tests/
+│   ├── __init__.py            # version, version d'API par défaut
+│   ├── __main__.py            # python -m fbtools
+│   ├── cli.py                 # commandes Click
+│   ├── client.py              # client API Graph (pagination, retries, jetons de Page)
+│   ├── config.py              # configuration locale + variables d'environnement
+│   ├── output.py              # rendu table / JSON / CSV
+│   └── py.typed               # paquet typé (PEP 561)
+├── tests/                     # 52 tests hors ligne
+├── CHANGELOG.md · ROADMAP.md · CONTRIBUTING.md · SECURITY.md · SUPPORT.md
+├── CODE_OF_CONDUCT.md · CITATION.cff · LICENSE
+├── Dockerfile · Makefile · mkdocs.yml · pyproject.toml
+└── .pre-commit-config.yaml · .editorconfig · .env.example
 ```
 
 <p align="right"><a href="#top">↑ Retour en haut</a></p>
@@ -446,9 +478,19 @@ fbtools/
 ## Développement
 
 ```bash
-pytest              # tests sans réseau (session HTTP simulée)
-ruff check src tests
+make install      # dépendances dev + docs, hooks pre-commit
+make check        # ruff (lint + format) · mypy strict · pytest + couverture
+make docs         # documentation en local sur http://127.0.0.1:8000
+make build        # wheel + sdist vérifiés par twine
+make docker       # image Docker locale
 ```
+
+| Outil | Rôle | Configuration |
+| :--- | :--- | :--- |
+| ![](https://img.shields.io/badge/Ruff-lint%20%2B%20format-D7FF64?style=flat-square&logo=ruff&logoColor=black) | Style et analyse statique | `pyproject.toml` |
+| ![](https://img.shields.io/badge/mypy-strict-2A6DB2?style=flat-square) | Typage | `pyproject.toml` |
+| ![](https://img.shields.io/badge/pytest-cov%20%E2%89%A5%2080%25-0A9EDC?style=flat-square&logo=pytest&logoColor=white) | Tests hors ligne | `tests/` |
+| ![](https://img.shields.io/badge/pre--commit-gitleaks-FAB040?style=flat-square&logo=precommit&logoColor=black) | Hooks avant commit, détection de secrets | `.pre-commit-config.yaml` |
 
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': {'git0':'#1877F2','git1':'#42B72A','git2':'#F7B928','gitBranchLabel0':'#FFFFFF','gitBranchLabel1':'#FFFFFF','fontFamily':'Segoe UI, Helvetica, Arial, sans-serif'}}}%%
@@ -467,6 +509,58 @@ gitGraph
 
 ---
 
+## Qualité et intégration continue
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, Helvetica, Arial, sans-serif'}}}%%
+flowchart LR
+    PR(["Push / PR"]):::a --> L["Lint · format · mypy"]:::b
+    PR --> T["Tests<br/>3 OS × Python 3.10 → 3.14"]:::b
+    PR --> S["CodeQL · revue des dépendances"]:::c
+    L --> B["Build wheel + sdist"]:::b
+    T --> B
+    TAG(["Tag vX.Y.Z"]):::a --> R["Release GitHub<br/>+ attestation"]:::d
+    TAG --> D["Image Docker GHCR"]:::d
+    TAG -.->|si PUBLISH_PYPI| P["PyPI"]:::d
+    M(["main"]):::a --> DOC["Docs → GitHub Pages"]:::d
+    classDef a fill:#1877F2,stroke:#0B5FCC,color:#FFFFFF
+    classDef b fill:#FFFFFF,stroke:#1877F2,color:#1C1E21
+    classDef c fill:#F7B928,stroke:#C99316,color:#1C1E21
+    classDef d fill:#42B72A,stroke:#2E8B1E,color:#FFFFFF
+```
+
+| Workflow | Déclencheur | Rôle |
+| :--- | :--- | :--- |
+| [`ci.yml`](.github/workflows/ci.yml) | push, PR | Lint, typage, tests multi-OS / multi-Python, build |
+| [`codeql.yml`](.github/workflows/codeql.yml) | push, PR, hebdomadaire | Analyse de sécurité du code |
+| [`dependency-review.yml`](.github/workflows/dependency-review.yml) | PR | Bloque les dépendances vulnérables |
+| [`docs.yml`](.github/workflows/docs.yml) | push sur `main` | Publie la [documentation](https://teremuhamblin.github.io/FBtools/) |
+| [`release.yml`](.github/workflows/release.yml) | tag `v*.*.*` | Release, attestation de provenance, Docker, PyPI optionnel |
+
+Dependabot met à jour chaque semaine les dépendances Python, les actions GitHub et l'image Docker.
+
+<p align="right"><a href="#top">↑ Retour en haut</a></p>
+
+---
+
+## Utilisation comme bibliothèque
+
+```python
+from fbtools.client import GraphClient
+from fbtools.config import Config
+
+cfg = Config.load()
+client = GraphClient(cfg.access_token or "", cfg.api_version, cfg.app_secret)
+for page in client.pages():
+    print(page["id"], page["name"])
+```
+
+Voir [l'API Python](docs/api-python.md) et les [exemples](examples/).
+
+<p align="right"><a href="#top">↑ Retour en haut</a></p>
+
+---
+
 ## Notes et bonnes pratiques
 
 > [!WARNING]
@@ -474,6 +568,21 @@ gitGraph
 
 > [!CAUTION]
 > Respectez les [Conditions de la plateforme Meta](https://developers.facebook.com/terms/) : FBtools n'utilise que l'API officielle.
+
+---
+
+## Contribuer, sécurité et support
+
+| | |
+| :--- | :--- |
+| ![](https://img.shields.io/badge/Contribuer-1877F2?style=flat-square) | [CONTRIBUTING.md](CONTRIBUTING.md) — environnement, conventions, flux de PR |
+| ![](https://img.shields.io/badge/Code%20de%20conduite-6E7681?style=flat-square) | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
+| ![](https://img.shields.io/badge/Sécurité-E41E3F?style=flat-square) | [SECURITY.md](SECURITY.md) — signalement privé des vulnérabilités |
+| ![](https://img.shields.io/badge/Support-42B72A?style=flat-square) | [SUPPORT.md](SUPPORT.md) — où poser vos questions |
+| ![](https://img.shields.io/badge/Changelog-F7B928?style=flat-square) | [CHANGELOG.md](CHANGELOG.md) · [ROADMAP.md](ROADMAP.md) |
+| ![](https://img.shields.io/badge/Citer-0866FF?style=flat-square) | [CITATION.cff](CITATION.cff) |
+
+<p align="right"><a href="#top">↑ Retour en haut</a></p>
 
 ---
 

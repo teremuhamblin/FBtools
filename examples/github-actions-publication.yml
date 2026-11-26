@@ -1,0 +1,31 @@
+# Exemple : copiez ce fichier dans .github/workflows/ d'un dépôt de contenu.
+# Secrets requis : FBTOOLS_ACCESS_TOKEN (jeton de longue durée), FBTOOLS_APP_SECRET (facultatif)
+# Variable requise : FB_PAGE_ID
+name: Publication Facebook
+
+on:
+  workflow_dispatch:
+    inputs:
+      fichier:
+        description: Fichier texte à publier
+        default: annonces/prochaine.txt
+  schedule:
+    - cron: "0 8 * * 1"   # chaque lundi 8 h UTC
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    environment: facebook   # ajoutez une validation manuelle sur cet environnement
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install git+https://github.com/teremuhamblin/FBtools.git
+      - name: Publier
+        env:
+          FBTOOLS_ACCESS_TOKEN: ${{ secrets.FBTOOLS_ACCESS_TOKEN }}
+          FBTOOLS_APP_SECRET: ${{ secrets.FBTOOLS_APP_SECRET }}
+          PAGE_ID: ${{ vars.FB_PAGE_ID }}
+          FICHIER: ${{ inputs.fichier || 'annonces/prochaine.txt' }}
+        run: fbtools posts publish --page "$PAGE_ID" --message-file "$FICHIER" -y
