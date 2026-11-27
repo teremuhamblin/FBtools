@@ -1,3 +1,5 @@
+###### README.md >> markdown 
+
 <a id="top"></a>
 
 <div align="center">
@@ -12,25 +14,29 @@
 
 ---
 
-![Version](https://img.shields.io/badge/version-1.0-1877F2?style=for-the-badge&logo=semver&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=FFD43B)
+![Version](https://img.shields.io/badge/version-1.0-0866FF?style=for-the-badge&logo=semver&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10%2B-0866FF?style=for-the-badge&logo=python&logoColor=FFD43B)
 ![Graph API](https://img.shields.io/badge/Graph%20API-v27.0-0866FF?style=for-the-badge&logo=meta&logoColor=white)
-![Licence](https://img.shields.io/badge/licence-MIT-42B72A?style=for-the-badge)
+![Licence](https://img.shields.io/badge/licence-MIT-0866FF?style=for-the-badge)
 
 ---
 
 [![CI](https://github.com/teremuhamblin/FBtools/actions/workflows/ci.yml/badge.svg)](https://github.com/teremuhamblin/FBtools/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/teremuhamblin/FBtools/actions/workflows/codeql.yml/badge.svg)](https://github.com/teremuhamblin/FBtools/actions/workflows/codeql.yml)
 [![Docs](https://github.com/teremuhamblin/FBtools/actions/workflows/docs.yml/badge.svg)](https://teremuhamblin.github.io/FBtools/)
-![Couverture](https://img.shields.io/badge/couverture-97%25-42B72A?style=flat-square)
-![Typage](https://img.shields.io/badge/mypy-strict-2A6DB2?style=flat-square)
-![Docker](https://img.shields.io/badge/docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white)
 
-![CLI](https://img.shields.io/badge/CLI-Click-4B4B4B?style=flat-square&logo=gnubash&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white)
-![Lint](https://img.shields.io/badge/lint-ruff-D7FF64?style=flat-square&logo=ruff&logoColor=black)
-![Formats](https://img.shields.io/badge/sortie-table%20%7C%20json%20%7C%20csv-F7B928?style=flat-square)
-![Sécurité](https://img.shields.io/badge/config-chmod%20600-E41E3F?style=flat-square&logo=letsencrypt&logoColor=white)
+---
+
+![Couverture](https://img.shields.io/badge/couverture-97%25-0866FF?style=flat-square)
+![Typage](https://img.shields.io/badge/mypy-strict-0866FF?style=flat-square)
+![Docker](https://img.shields.io/badge/docker-ghcr.io-0866FF?style=flat-square&logo=docker&logoColor=white)
+
+---
+
+![CLI](https://img.shields.io/badge/CLI-Click-0866FF?style=flat-square&logo=gnubash&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-pytest-0866FF?style=flat-square&logo=pytest&logoColor=white)
+![Lint](https://img.shields.io/badge/lint-ruff-0866FF?style=flat-square&logo=ruff&logoColor=black)
+![Formats](https://img.shields.io/badge/sortie-table%20%7C%20json%20%7C%20csv-0866FF?style=flat-square)
 
 ---
 
